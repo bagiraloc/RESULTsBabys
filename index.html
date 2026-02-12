@@ -144,15 +144,6 @@ async function loadData() {
       return;
     }
 
-    let row = data.values[0];
-    row = Array.from({ length: 7 }, (_, i) => row[i] || "—");
-
-    const filledCount = row.filter(v => v && v.trim() !== "—").length;
-    if (filledCount < 3 && oldRow.length) {
-      console.warn("Отримано неповні дані — оновлення пропущено");
-      return;
-    }
-
     // затримка 1 секунда — щоб гімнастка встигла покрутитись
     await new Promise(r => setTimeout(r, 1000));
 
