@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Оцінки спортсменів — Художня гімнастика</title>
 <style>
+/* ОСНОВНІ СТИЛІ ТА ФОН */
 body {
   margin: 0;
   font-family: "Poppins", sans-serif;
@@ -17,6 +18,27 @@ body {
   height: 100vh;
   text-align: center;
   overflow: hidden;
+}
+
+/* ЛОГОТИП SPORTART (ЗВЕРХУ ЛІВОРУЧ) */
+.logo-sportart {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 150px; /* Можна підправити розмір */
+  height: auto;
+  z-index: 1000;
+}
+
+/* ЛОГОТИП ESTEVENTS (ВНИЗУ ПРАВОРУЧ) */
+.logo-estevents {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 100px; /* Трохи менший, як ви і хотіли */
+  height: auto;
+  z-index: 1000;
+  opacity: 0.8;
 }
 
 header {
@@ -37,11 +59,9 @@ header {
   backdrop-filter: blur(15px);
   min-width: 65%;
   position: relative;
-  /* Прибираємо різку зміну прозорості всього блоку */
   transition: filter 0.5s ease-in-out, transform 0.5s ease-in-out;
 }
 
-/* Клас для м'якого ефекту оновлення */
 .updating {
   filter: blur(8px);
   transform: scale(0.98);
@@ -58,7 +78,6 @@ header {
   color: #bb8fff;
   font-weight: 600;
   text-shadow: 0 0 10px rgba(187, 143, 255, 0.3);
-  /* Анімація появи кожної клітинки окремо */
   animation: fadeUp 0.6s ease-out forwards;
 }
 
@@ -76,6 +95,7 @@ footer {
   opacity: 0.8;
 }
 
+/* АНІМАЦІЇ */
 @keyframes fadeUp {
   0% { transform: translateY(10px); opacity: 0; }
   100% { transform: translateY(0); opacity: 1; }
@@ -90,9 +110,20 @@ footer {
   0%, 100% { transform: scale(1); text-shadow: 0 0 15px #ffd700; }
   50% { transform: scale(1.15); text-shadow: 0 0 30px #ffea8a; }
 }
+
+/* Мобільна адаптація */
+@media (max-width: 768px) {
+  .logo-sportart { width: 100px; top: 10px; left: 10px; }
+  .logo-estevents { width: 70px; bottom: 10px; right: 10px; }
+  header { font-size: 1.5em; }
+  .cell { font-size: 1.3em; }
+}
 </style>
 </head>
 <body>
+
+<img src="logo_sportart.png.jpg" alt="Sportart Logo" class="logo-sportart">
+<img src="logo_estevents.png.png" alt="EstEvents Logo" class="logo-estevents">
 
 <header>Результати змагань з художньої гімнастики</header>
 
@@ -134,25 +165,20 @@ async function loadData() {
 
     const newData = JSON.stringify(fixedRow);
 
-    // Якщо дані не змінилися — виходимо, щоб нічого не миготіло
     if (newData === lastData) return;
     lastData = newData;
 
-    // ДОДАЄМО ЕФЕКТ "М'ЯКОГО ПЕРЕХОДУ"
     scoreboard.classList.add("updating");
 
     setTimeout(() => {
       let html = "";
       fixedRow.forEach((v, index) => {
-        // Додаємо невелику затримку появи для кожної клітинки (ефект каскаду)
         html += `<div class="cell" style="animation-delay: ${index * 0.05}s">${v}</div>`;
       });
 
       content.innerHTML = html;
-      
-      // Прибираємо блюр — дані плавно проявляються
       scoreboard.classList.remove("updating");
-    }, 300); // Час на "затуманення" перед зміною тексту
+    }, 300);
 
   } catch (e) {
     console.error("Помилка:", e);
@@ -160,7 +186,6 @@ async function loadData() {
 }
 
 loadData();
-// Опитування кожні 2.5 секунди для балансу швидкості та стабільності
 setInterval(loadData, 2500);
 </script>
 
