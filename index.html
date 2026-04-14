@@ -56,8 +56,8 @@ header {
   flex-direction: column;
   justify-content: center; 
   transition: filter 0.5s ease-in-out;
-  /* ПІДНЯТО РАМКУ ВГОРУ */
-  margin-top: -20px; 
+  /* ПІДНЯТО РАМКУ ВГОРУ ЩЕ БІЛЬШЕ (~1 см на екрані ноутбука) */
+  margin-top: -60px; 
 }
 
 .cell-container {
@@ -68,7 +68,6 @@ header {
 
 .cell {
   font-size: 4.2em; 
-  /* ВЕСЬ ТЕКСТ БІЛИЙ */
   color: #ffffff;
   font-weight: 900; 
   line-height: 1.1;
@@ -76,14 +75,12 @@ header {
   animation: fadeUp 0.6s ease-out forwards;
 }
 
-/* ПЕРШИЙ РЯДОК ТЕПЕР ТАКОЖ БІЛИЙ */
 .cell:first-child {
   color: #ffffff;
   font-size: 5em;
   margin-bottom: 5px;
 }
 
-/* КОРОНА ТЕПЕР БІЛА */
 .decor {
   font-size: 4em;
   color: #ffffff;
