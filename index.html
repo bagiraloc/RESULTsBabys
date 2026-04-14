@@ -56,6 +56,8 @@ header {
   flex-direction: column;
   justify-content: center; 
   transition: filter 0.5s ease-in-out;
+  /* ПІДНЯТО РАМКУ ВГОРУ */
+  margin-top: -20px; 
 }
 
 .cell-container {
@@ -65,8 +67,8 @@ header {
 }
 
 .cell {
-  /* Оскільки рядків стало менше, збільшуємо шрифт до 4.2em */
   font-size: 4.2em; 
+  /* ВЕСЬ ТЕКСТ БІЛИЙ */
   color: #ffffff;
   font-weight: 900; 
   line-height: 1.1;
@@ -74,16 +76,17 @@ header {
   animation: fadeUp 0.6s ease-out forwards;
 }
 
-/* Прізвище (стовпець B) стає золотим та найбільшим */
+/* ПЕРШИЙ РЯДОК ТЕПЕР ТАКОЖ БІЛИЙ */
 .cell:first-child {
-  color: #ffd700;
+  color: #ffffff;
   font-size: 5em;
   margin-bottom: 5px;
 }
 
+/* КОРОНА ТЕПЕР БІЛА */
 .decor {
   font-size: 4em;
-  color: #ffd700;
+  color: #ffffff;
   margin-bottom: 5px;
   animation: pulseStar 2s infinite ease-in-out;
 }
@@ -118,7 +121,7 @@ footer {
   .header-logo { width: 220px; }
   .cell { font-size: 1.4em; }
   .cell:first-child { font-size: 1.7em; }
-  .scoreboard { padding: 15px 25px; min-width: 92%; }
+  .scoreboard { padding: 15px 25px; min-width: 92%; margin-top: 0; }
   .decor { font-size: 1.8em; }
 }
 </style>
@@ -155,7 +158,6 @@ async function loadData() {
     const data = await res.json();
     if (!Array.isArray(data)) return;
 
-    // ЗМІНА ТУТ: Починаємо з індексу 1 (стовпець B) і беремо 6 елементів (B, C, D, E, F, G)
     const fixedRow = data.slice(1, 7).map(v => 
       v !== undefined && String(v).trim() !== "" ? String(v).trim() : "—"
     );
