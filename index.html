@@ -22,7 +22,8 @@ body {
 
 header {
   flex-shrink: 0;
-  margin-top: 5px; 
+  /* ПІДНЯТО ЛОГОТИП (від’ємний відступ для підйому вгору) */
+  margin-top: -70px; 
   margin-bottom: 2px; 
   animation: fadeIn 1.5s ease-in-out;
 }
@@ -56,8 +57,8 @@ header {
   flex-direction: column;
   justify-content: center; 
   transition: filter 0.5s ease-in-out;
-  /* ПІДНЯТО РАМКУ ВГОРУ ЩЕ БІЛЬШЕ (~1 см на екрані ноутбука) */
-  margin-top: -60px; 
+  /* ПІДНЯТО РАМКУ ЩЕ ВИЩЕ (додано ~2 см до попереднього значення) */
+  margin-top: -140px; 
 }
 
 .cell-container {
@@ -119,6 +120,7 @@ footer {
   .cell { font-size: 1.4em; }
   .cell:first-child { font-size: 1.7em; }
   .scoreboard { padding: 15px 25px; min-width: 92%; margin-top: 0; }
+  .header { margin-top: 5px; }
   .decor { font-size: 1.8em; }
 }
 </style>
