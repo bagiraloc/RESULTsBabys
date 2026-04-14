@@ -81,7 +81,7 @@ footer {
 </head>
 <body>
 
-<header>результати змагань з художньої гімнастики</header>
+<header>Результати змагань з художньої гімнастики</header>
 
 <div class="scoreboard" id="scoreboard">
   <div class="decor">👑</div>
@@ -91,7 +91,8 @@ footer {
 <footer>© 2025 EstEvents by Емма Щелецька</footer>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzbcHHPqHcRlhRl3r2ukqNG6bCbCY8gkiR2c9-q9D0OLcTwee-Zl7yvi1_jo0VKxCI-LQ/exec";
+// Оновлене посилання на ваш Apps Script
+const API_URL = "https://script.google.com/macros/s/AKfycby8bIfxUFNLKBZZ9OQn9r-Dqt7jsaJULJJ-yNHhIT8U7AFGkWf8aiNrbG7cVbxEw6Oc0w/exec";
 
 let lastData = "";
 
@@ -99,21 +100,19 @@ async function loadData() {
   const scoreboard = document.getElementById("scoreboard");
 
   try {
+    // Додаємо ?t= для запобігання кешуванню на стороні браузера та Google
     const res = await fetch(API_URL + "?t=" + Date.now(), {
       method: "GET",
       cache: "no-store"
     });
 
-    if (!res.ok) {
-      throw new Error("HTTP " + res.status);
-    }
+    if (!res.ok) throw new Error("Помилка мережі");
 
     const data = await res.json();
 
-    if (!Array.isArray(data)) {
-      throw new Error("Невірний формат даних");
-    }
+    if (!Array.isArray(data)) throw new Error("Невірний формат");
 
+    // Формуємо чистий масив (7 значень)
     const fixedRow = Array.from({ length: 7 }, (_, i) => {
       const value = data[i];
       return value !== undefined && value !== null && String(value).trim() !== ""
@@ -123,28 +122,33 @@ async function loadData() {
 
     const newData = JSON.stringify(fixedRow);
 
+    // Якщо дані в таблиці не змінилися — не оновлюємо екран
     if (newData === lastData) return;
     lastData = newData;
 
+    // Створюємо HTML
     let html = `<div class="decor">👑</div>`;
     fixedRow.forEach(v => {
       html += `<div class="cell">${v}</div>`;
     });
 
+    // Анімація зміни даних
     scoreboard.style.opacity = 0;
-
     setTimeout(() => {
       scoreboard.innerHTML = html;
       scoreboard.style.opacity = 1;
     }, 120);
 
   } catch (e) {
-    scoreboard.innerHTML =
-      `<div class="decor">👑</div><div class="cell">Помилка завантаження</div>`;
+    console.error("Помилка:", e);
+    // Якщо сталася помилка, залишаємо попередні дані або показуємо статус
   }
 }
 
+// Перший запуск
 loadData();
+
+// Перевірка оновлень кожні 2 секунди
 setInterval(loadData, 2000);
 </script>
 
