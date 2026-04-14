@@ -91,56 +91,88 @@ footer {
 <footer>© 2025 EstEvents by Емма Щелецька</footer>
 
 <script>
-// Ваша адреса веб-додатка
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzbcHHPqHcRlhRl3r2ukqNG6bCbCY8gkiR2c9-q9D0OLcTwee-Zl7yvi1_jo0VKxCI-LQ/exec";
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRz-4FumJ2c76o-bbGnbWWg_gw9nqxbEYMjdIaJi6Y5uMELcOfmiByk08qBfS8-MPt4vV3pBlJ_TuZT/pub?gid=1614929973&single=true&output=csv";
 
-let lastDataStr = "";
+let lastData = "";
 
 async function loadData() {
   const scoreboard = document.getElementById("scoreboard");
 
   try {
-    // ДОДАЄМО ПАРАМЕТР ?t= ДЛЯ ПРИМУСОВОГО ОНОВЛЕННЯ ДАНИХ (АНТИКЕШ)
-    const response = await fetch(WEB_APP_URL + "?t=" + new Date().getTime());
-    
-    if (!response.ok) throw new Error("Помилка мережі");
-    
-    const row = await response.json();
-
-    // Якщо рядок порожній або не прийшов
-    if (!row || row.length === 0) return;
-
-    // Перетворюємо дані у рядок для порівняння (щоб не оновлювати екран дарма)
-    const currentDataStr = JSON.stringify(row);
-    if (currentDataStr === lastDataStr) return;
-    lastDataStr = currentDataStr;
-
-    // Створюємо HTML для виводу (7 стовпців)
-    let html = `<div class="decor">👑</div>`;
-    
-    // Виводимо всі колонки, які приходять (обмежуємо 7-ма для дизайну)
-    row.slice(0, 7).forEach(text => {
-      const val = (text !== "" && text !== null) ? text : "—";
-      html += `<div class="cell">${val}</div>`;
+    const res = await fetch(SHEET_URL + "&t=" + Date.now(), {
+      cache: "no-store"
     });
 
-    // Ефект перемикання даних
+    const text = await res.text();
+
+    const rows = parseCSV(text);
+
+    // 👉 беремо 7-й рядок (але стабільно)
+    const row = rows[6] || [];
+
+    const fixedRow = Array.from({ length: 7 }, (_, i) => row[i] ?? "—");
+
+    const newData = JSON.stringify(fixedRow);
+
+    if (newData === lastData) return;
+    lastData = newData;
+
+    let html = `<div class="decor">👑</div>`;
+
+    fixedRow.forEach(v => {
+      html += `<div class="cell">${v}</div>`;
+    });
+
     scoreboard.style.opacity = 0;
+
     setTimeout(() => {
       scoreboard.innerHTML = html;
       scoreboard.style.opacity = 1;
-    }, 150);
+    }, 120);
 
-  } catch (error) {
-    console.error("Помилка завантаження:", error);
+  } catch (e) {
+    document.getElementById("scoreboard").innerHTML =
+      `<div class="decor">👑</div><div class="cell">Помилка завантаження</div>`;
   }
 }
 
-// Запуск відразу
-loadData();
+/* 🔥 НАДІЙНИЙ CSV ПАРСЕР */
+function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let value = "";
+  let inQuotes = false;
 
-// Опитування кожні 3 секунди
-setInterval(loadData, 3000);
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+
+    if (c === '"') {
+      inQuotes = !inQuotes;
+    } else if (c === "," && !inQuotes) {
+      row.push(value);
+      value = "";
+    } else if ((c === "\n" || c === "\r") && !inQuotes) {
+      if (value !== "" || row.length) {
+        row.push(value);
+        rows.push(row);
+        row = [];
+        value = "";
+      }
+    } else {
+      value += c;
+    }
+  }
+
+  if (value || row.length) {
+    row.push(value);
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+loadData();
+setInterval(loadData, 2000);
 </script>
 
 </body>
