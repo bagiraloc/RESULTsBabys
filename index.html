@@ -116,7 +116,7 @@ footer {
 <footer>© 2025 EstEvents by Емма Щелецька</footer>
 
 <script>
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/1gBNHtvbDQ5welQn09qDcLFtVPMNwGL3OSI8zeC1pZN4/gviz/tq?tqx=out:json";
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRz-4FumJ2c76o-bbGnbWWg_gw9nqxbEYMjdIaJi6Y5uMELcOfmiByk08qBfS8-MPt4vV3pBlJ_TuZT/pub?gid=1614929973&single=true&output=csv";
 
 let lastData = "";
 
@@ -124,32 +124,21 @@ async function loadData() {
   const scoreboard = document.getElementById("scoreboard");
 
   try {
-    const res = await fetch(SHEET_URL, { cache: "no-store" });
+    const res = await fetch(SHEET_URL + "&t=" + Date.now(), {
+      cache: "no-store"
+    });
+
     const text = await res.text();
 
-    const json = JSON.parse(
-      text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1)
-    );
+    const rows = text
+      .trim()
+      .split("\n")
+      .map(r => r.split(","));
 
-    const rows = json.table.rows;
+    // 👉 беремо 7-й рядок (але захищено)
+    let row = rows[6] || [];
 
-    // 🔥 шукаємо перший нормальний рядок з даними
-    let foundRow = null;
-
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i]?.c?.map(c => c ? c.v : "—") || [];
-      
-      const hasData = row.some(v => v !== "—" && v !== null && v !== "");
-
-      if (hasData) {
-        foundRow = row;
-        break; // беремо ПЕРШИЙ нормальний рядок
-      }
-    }
-
-    if (!foundRow) return;
-
-    const fixedRow = Array.from({ length: 7 }, (_, i) => foundRow[i] ?? "—");
+    const fixedRow = Array.from({ length: 7 }, (_, i) => row[i] ?? "—");
 
     const newData = JSON.stringify(fixedRow);
 
@@ -171,7 +160,7 @@ async function loadData() {
     }, 120);
 
   } catch (err) {
-    scoreboard.innerHTML = `
+    document.getElementById("scoreboard").innerHTML = `
       <div class="decor">👑</div>
       <div class="cell">Помилка 😢<br>${err.message}</div>
     `;
@@ -179,7 +168,7 @@ async function loadData() {
 }
 
 loadData();
-setInterval(loadData, 2000);
+setInterval(loadData, 3000);
 </script>
 </body>
 </html>
