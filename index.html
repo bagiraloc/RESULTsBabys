@@ -116,7 +116,7 @@ footer {
 <footer>© 2025 EstEvents by Емма Щелецька</footer>
 
 <script>
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRz-4FumJ2c76o-bbGnbWWg_gw9nqxbEYMjdIaJi6Y5uMELcOfmiByk08qBfS8-MPt4vV3pBlJ_TuZT/pub?gid=1614929973&single=true&output=csv&t=" + new Date().getTime();
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRz-4FumJ2c76o-bbGnbWWg_gw9nqxbEYMjdIaJi6Y5uMELcOfmiByk08qBfS8-MPt4vV3pBlJ_TuZT/pub?gid=1614929973&single=true&output=csv&t=" + Date.now();
 
 let oldRow = [];
 
@@ -131,9 +131,7 @@ async function loadData() {
   `;
 
   try {
-    const res = await fetch(SHEET_URL, {
-  cache: "no-store"
-});
+    const res = await fetch(SHEET_URL, { cache: "no-store" });
     if (!res.ok) throw new Error("HTTP " + res.status);
 
     const text = await res.text();
