@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Sportart Rhythmic — LIVE</title>
 <style>
-/* ОСНОВНІ НАЛАШТУВАННЯ */
 body {
   margin: 0;
   padding: 0;
@@ -14,7 +13,6 @@ body {
   color: #ffffff;
   display: flex;
   flex-direction: column;
-  /* ПРИТИСКАЄМО ВСЕ ДО ВЕРХУ, ЩОБ ПРИБРАТИ ВІДСТАНЬ */
   justify-content: flex-start; 
   align-items: center;
   height: 100vh;
@@ -22,21 +20,19 @@ body {
   overflow: hidden;
 }
 
-/* ЦЕНТРАЛЬНИЙ ЛОГОТИП (ЗВЕРХУ) */
 header {
   flex-shrink: 0;
-  margin-top: 5px; /* Мінімальний відступ від верхнього краю екрана */
-  margin-bottom: 2px; /* Мінімальний відступ до рамки (близько 1мм) */
+  margin-top: 5px; 
+  margin-bottom: 2px; 
   animation: fadeIn 1.5s ease-in-out;
 }
 
 .header-logo {
-  width: 500px; /* Збільшено логотип для масштабу */
+  width: 520px; 
   height: auto;
   filter: drop-shadow(0 0 20px rgba(194, 153, 255, 0.4));
 }
 
-/* ЛОГОТИП PARTNER (ВНИЗУ ПРАВОРУЧ) */
 .logo-estevents {
   position: fixed;
   bottom: 25px;
@@ -47,69 +43,62 @@ header {
   opacity: 0.8;
 }
 
-/* ТАБЛИЦЯ (РАМКА) - МАГІЯ ТУТ */
 .scoreboard {
   background: rgba(255, 255, 255, 0.05);
-  border: 4px solid rgba(200, 150, 255, 0.5); /* Товстіша рамка */
+  border: 4px solid rgba(200, 150, 255, 0.5); 
   border-radius: 30px;
-  padding: 20px 60px; /* Оптимізовані відступи */
+  padding: 30px 60px; 
   box-shadow: 0 0 50px rgba(160, 80, 255, 0.2);
   backdrop-filter: blur(15px);
-  min-width: 80%; /* Ширша таблиця для масштабу */
-  
-  /* ЦЕ ПОВЕРТАЄ НИЖНІЙ КРАЙ РАМКИ */
-  max-height: 80vh; /* Рамка не може бути вищою за 80% екрана */
+  min-width: 85%; 
+  max-height: 75vh; 
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Центруємо текст всередині рамки */
+  justify-content: center; 
   transition: filter 0.5s ease-in-out;
 }
 
-/* КОНТЕЙНЕР ДЛЯ ТЕКСТУ */
 .cell-container {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* Менша відстань між рядками */
+  gap: 12px; 
 }
 
-/* ТЕКСТ - ПЛАКАТНИЙ ТА ЖИРНИЙ */
 .cell {
-  font-size: 3.8em; /* Оптимальний розмір, щоб вміститися */
+  /* Оскільки рядків стало менше, збільшуємо шрифт до 4.2em */
+  font-size: 4.2em; 
   color: #ffffff;
-  /* Текст став максимально жирним */
   font-weight: 900; 
   line-height: 1.1;
   text-shadow: 3px 3px 15px rgba(0, 0, 0, 0.5);
   animation: fadeUp 0.6s ease-out forwards;
 }
 
-/* Акцент на перший рядок (прізвище) */
+/* Прізвище (стовпець B) стає золотим та найбільшим */
 .cell:first-child {
   color: #ffd700;
-  font-size: 4.5em;
+  font-size: 5em;
+  margin-bottom: 5px;
 }
 
-/* Декор (Корона/Зірка) */
 .decor {
-  font-size: 3.5em;
+  font-size: 4em;
   color: #ffd700;
   margin-bottom: 5px;
   animation: pulseStar 2s infinite ease-in-out;
 }
 
-/* ФУТЕР - ТЕПЕР ФІКСОВАНИЙ ВНИЗУ */
 footer {
   position: fixed;
   bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
   color: #bdaaff;
-  font-size: 1.2em; /* Футер теж став більшим */
+  font-size: 1.2em; 
   font-weight: 600;
   opacity: 0.7;
 }
 
-/* АНІМАЦІЇ */
 @keyframes fadeUp {
   0% { transform: translateY(15px); opacity: 0; }
   100% { transform: translateY(0); opacity: 1; }
@@ -125,13 +114,12 @@ footer {
   50% { transform: scale(1.1); }
 }
 
-/* Мобільна адаптація */
 @media (max-width: 768px) {
-  .header-logo { width: 200px; }
-  .cell { font-size: 1.3em; }
-  .cell:first-child { font-size: 1.5em; }
-  .scoreboard { padding: 15px 25px; min-width: 90%; }
-  .decor { font-size: 1.6em; }
+  .header-logo { width: 220px; }
+  .cell { font-size: 1.4em; }
+  .cell:first-child { font-size: 1.7em; }
+  .scoreboard { padding: 15px 25px; min-width: 92%; }
+  .decor { font-size: 1.8em; }
 }
 </style>
 </head>
@@ -146,7 +134,7 @@ footer {
 <div class="scoreboard" id="scoreboard">
   <div class="decor">👑</div>
   <div id="content" class="cell-container">
-    <div class="cell">ЗАВАНТАЖЕННЯ...</div>
+    <div class="cell">ОЧІКУВАННЯ...</div>
   </div>
 </div>
 
@@ -167,15 +155,16 @@ async function loadData() {
     const data = await res.json();
     if (!Array.isArray(data)) return;
 
-    const fixedRow = Array.from({ length: 7 }, (_, i) => {
-      return data[i] !== undefined && String(data[i]).trim() !== "" ? String(data[i]).trim() : "—";
-    });
+    // ЗМІНА ТУТ: Починаємо з індексу 1 (стовпець B) і беремо 6 елементів (B, C, D, E, F, G)
+    const fixedRow = data.slice(1, 7).map(v => 
+      v !== undefined && String(v).trim() !== "" ? String(v).trim() : "—"
+    );
 
     const newData = JSON.stringify(fixedRow);
     if (newData === lastData) return;
     lastData = newData;
 
-    scoreboard.style.filter = "blur(10px)";
+    scoreboard.style.filter = "blur(8px)";
 
     setTimeout(() => {
       content.innerHTML = fixedRow.map((v, i) => 
