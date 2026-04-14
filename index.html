@@ -131,7 +131,9 @@ async function loadData() {
   `;
 
   try {
-    const res = await fetch(SHEET_URL);
+    const res = await fetch(SHEET_URL, {
+  cache: "no-store"
+});
     if (!res.ok) throw new Error("HTTP " + res.status);
 
     const text = await res.text();
