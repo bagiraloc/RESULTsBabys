@@ -3,14 +3,15 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Оцінки спортсменів — Художня гімнастика</title>
+<title>Результати змагань — SportArt</title>
 <style>
-/* ОСНОВНІ СТИЛІ ТА ФОН */
+/* ОСНОВНІ СТИЛІ */
 body {
   margin: 0;
   font-family: "Poppins", sans-serif;
-  background: radial-gradient(circle at top, #1a082b 0%, #0c0215 100%);
-  color: #e3cfff;
+  /* Колір фону взято безпосередньо з вашого логотипу SportArt */
+  background-color: #5c2084; 
+  color: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -20,79 +21,74 @@ body {
   overflow: hidden;
 }
 
-/* ЛОГОТИП SPORTART (ЗВЕРХУ ЛІВОРУЧ) */
+/* ЛОГОТИПИ */
 .logo-sportart {
   position: fixed;
   top: 20px;
   left: 20px;
-  width: 150px; /* Можна підправити розмір */
+  width: 160px;
   height: auto;
   z-index: 1000;
 }
 
-/* ЛОГОТИП ESTEVENTS (ВНИЗУ ПРАВОРУЧ) */
 .logo-estevents {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 100px; /* Трохи менший, як ви і хотіли */
+  width: 110px;
   height: auto;
   z-index: 1000;
-  opacity: 0.8;
 }
 
 header {
-  color: #fff;
   font-size: 2.2em;
   font-weight: 600;
-  margin-bottom: 40px;
-  text-shadow: 0 0 15px #c299ff;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
   animation: fadeIn 1.5s ease-in-out;
 }
 
+/* ТАБЛО (Колір EstEvents для контрасту) */
 .scoreboard {
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid rgba(200, 150, 255, 0.4);
-  border-radius: 20px;
+  /* Темно-синій фон як у логотипу EstEvents з легкою прозорістю */
+  background: rgba(13, 51, 74, 0.9); 
+  border: 2px solid #ffffff;
+  border-radius: 25px;
   padding: 40px 60px;
-  box-shadow: 0 0 40px rgba(160, 80, 255, 0.2);
-  backdrop-filter: blur(15px);
-  min-width: 65%;
-  position: relative;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+  min-width: 60%;
   transition: filter 0.5s ease-in-out, transform 0.5s ease-in-out;
 }
 
 .updating {
-  filter: blur(8px);
+  filter: blur(5px);
   transform: scale(0.98);
 }
 
 .cell-container {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
 }
 
 .cell {
-  font-size: 1.8em;
-  color: #bb8fff;
-  font-weight: 600;
-  text-shadow: 0 0 10px rgba(187, 143, 255, 0.3);
+  font-size: 2em;
+  color: #ffffff;
+  font-weight: 700;
   animation: fadeUp 0.6s ease-out forwards;
 }
 
 .decor {
   font-size: 2.5em;
   color: #ffd700;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   animation: pulseStar 2s infinite ease-in-out;
 }
 
 footer {
-  margin-top: 50px;
-  color: #bdaaff;
-  font-size: 1em;
-  opacity: 0.8;
+  margin-top: 40px;
+  font-size: 0.9em;
+  opacity: 0.9;
 }
 
 /* АНІМАЦІЇ */
@@ -107,16 +103,17 @@ footer {
 }
 
 @keyframes pulseStar {
-  0%, 100% { transform: scale(1); text-shadow: 0 0 15px #ffd700; }
-  50% { transform: scale(1.15); text-shadow: 0 0 30px #ffea8a; }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
-/* Мобільна адаптація */
+/* Адаптація для телефонів */
 @media (max-width: 768px) {
-  .logo-sportart { width: 100px; top: 10px; left: 10px; }
-  .logo-estevents { width: 70px; bottom: 10px; right: 10px; }
+  .logo-sportart { width: 100px; top: 15px; left: 15px; }
+  .logo-estevents { width: 80px; bottom: 15px; right: 15px; }
   header { font-size: 1.5em; }
   .cell { font-size: 1.3em; }
+  .scoreboard { padding: 25px; width: 80%; }
 }
 </style>
 </head>
@@ -125,10 +122,10 @@ footer {
 <img src="logo_sportart.png.jpg" alt="Sportart Logo" class="logo-sportart">
 <img src="logo_estevents.png.png" alt="EstEvents Logo" class="logo-estevents">
 
-<header>Результати змагань з художньої гімнастики</header>
+<header>Результати змагань</header>
 
 <div class="scoreboard" id="scoreboard">
-  <div class="decor">👑</div>
+  <div class="decor">✨</div>
   <div id="content" class="cell-container">
     <div class="cell">Завантаження...</div>
   </div>
@@ -138,7 +135,6 @@ footer {
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycby8bIfxUFNLKBZZ9OQn9r-Dqt7jsaJULJJ-yNHhIT8U7AFGkWf8aiNrbG7cVbxEw6Oc0w/exec";
-
 let lastData = "";
 
 async function loadData() {
@@ -146,43 +142,30 @@ async function loadData() {
   const content = document.getElementById("content");
 
   try {
-    const res = await fetch(API_URL + "?t=" + Date.now(), {
-      method: "GET",
-      cache: "no-store"
-    });
-
+    const res = await fetch(API_URL + "?t=" + Date.now());
     if (!res.ok) return;
 
     const data = await res.json();
     if (!Array.isArray(data)) return;
 
     const fixedRow = Array.from({ length: 7 }, (_, i) => {
-      const value = data[i];
-      return value !== undefined && value !== null && String(value).trim() !== ""
-        ? String(value).trim()
-        : "—";
+      return data[i] !== undefined && String(data[i]).trim() !== "" ? String(data[i]).trim() : "—";
     });
 
     const newData = JSON.stringify(fixedRow);
-
     if (newData === lastData) return;
     lastData = newData;
 
     scoreboard.classList.add("updating");
 
     setTimeout(() => {
-      let html = "";
-      fixedRow.forEach((v, index) => {
-        html += `<div class="cell" style="animation-delay: ${index * 0.05}s">${v}</div>`;
-      });
-
-      content.innerHTML = html;
+      content.innerHTML = fixedRow.map((v, i) => 
+        `<div class="cell" style="animation-delay: ${i * 0.05}s">${v}</div>`
+      ).join('');
       scoreboard.classList.remove("updating");
     }, 300);
 
-  } catch (e) {
-    console.error("Помилка:", e);
-  }
+  } catch (e) { console.error("Помилка", e); }
 }
 
 loadData();
