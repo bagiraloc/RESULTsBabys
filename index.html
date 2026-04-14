@@ -124,13 +124,18 @@ async function loadData() {
   const scoreboard = document.getElementById("scoreboard");
 
   try {
-    const res = await fetch(SHEET_URL + "&t=" + Date.now(), {
-      cache: "no-store"
+    // Додано cache: "no-cache" та заголовки для примусового оновлення
+    const res = await fetch(SHEET_URL + "&cachebuster=" + Date.now(), {
+      method: 'GET',
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
     });
 
     const text = await res.text();
 
-    // 🔥 НАДІЙНИЙ CSV парсер (підтримує коми в тексті)
     const rows = parseCSV(text);
 
     // 👉 7-й рядок
