@@ -37,11 +37,9 @@ header {
   backdrop-filter: blur(15px);
   min-width: 65%;
   position: relative;
-  /* Прибираємо різку зміну прозорості всього блоку */
   transition: filter 0.5s ease-in-out, transform 0.5s ease-in-out;
 }
 
-/* Клас для м'якого ефекту оновлення */
 .updating {
   filter: blur(8px);
   transform: scale(0.98);
@@ -58,7 +56,6 @@ header {
   color: #bb8fff;
   font-weight: 600;
   text-shadow: 0 0 10px rgba(187, 143, 255, 0.3);
-  /* Анімація появи кожної клітинки окремо */
   animation: fadeUp 0.6s ease-out forwards;
 }
 
@@ -94,7 +91,7 @@ footer {
 </head>
 <body>
 
-<header>Sport Art Cup - 2026</header>
+<header>Результати змагань з художньої гімнастики</header>
 
 <div class="scoreboard" id="scoreboard">
   <div class="decor">👑</div>
@@ -106,6 +103,7 @@ footer {
 <footer>© 2025 EstEvents by Емма Щелецька</footer>
 
 <script>
+// Використовуйте ваше останнє посилання на скрипт
 const API_URL = "https://script.google.com/macros/s/AKfycby8bIfxUFNLKBZZ9OQn9r-Dqt7jsaJULJJ-yNHhIT8U7AFGkWf8aiNrbG7cVbxEw6Oc0w/exec";
 
 let lastData = "";
@@ -126,33 +124,32 @@ async function loadData() {
     if (!Array.isArray(data)) return;
 
     const fixedRow = Array.from({ length: 7 }, (_, i) => {
-      const value = data[i];
+      let value = data[i];
+      
+      // Якщо це число, примусово робимо 3 знаки після коми (на всякий випадок і тут)
+      if (typeof value === 'number') {
+        return value.toFixed(3);
+      }
+      
       return value !== undefined && value !== null && String(value).trim() !== ""
         ? String(value).trim()
         : "—";
     });
 
     const newData = JSON.stringify(fixedRow);
-
-    // Якщо дані не змінилися — виходимо, щоб нічого не миготіло
     if (newData === lastData) return;
     lastData = newData;
 
-    // ДОДАЄМО ЕФЕКТ "М'ЯКОГО ПЕРЕХОДУ"
     scoreboard.classList.add("updating");
 
     setTimeout(() => {
       let html = "";
       fixedRow.forEach((v, index) => {
-        // Додаємо невелику затримку появи для кожної клітинки (ефект каскаду)
         html += `<div class="cell" style="animation-delay: ${index * 0.05}s">${v}</div>`;
       });
-
       content.innerHTML = html;
-      
-      // Прибираємо блюр — дані плавно проявляються
       scoreboard.classList.remove("updating");
-    }, 300); // Час на "затуманення" перед зміною тексту
+    }, 300);
 
   } catch (e) {
     console.error("Помилка:", e);
@@ -160,7 +157,6 @@ async function loadData() {
 }
 
 loadData();
-// Опитування кожні 2.5 секунди для балансу швидкості та стабільності
 setInterval(loadData, 2500);
 </script>
 
