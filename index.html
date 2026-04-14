@@ -40,22 +40,6 @@ header {
   position: relative;
 }
 
-/* Гімнастка (анімація під час оновлення) */
-.spinner {
-  width: 120px;
-  height: 120px;
-  margin: 30px auto;
-  background-image: url('https://i.imgur.com/XavZj7E.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  animation: spinGymnast 2s linear infinite;
-}
-
-@keyframes spinGymnast {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
 .cell {
   font-size: 1.6em;
   color: #bb8fff;
@@ -93,20 +77,10 @@ footer {
   0%, 100% { transform: scale(1); text-shadow: 0 0 10px #ffd700; }
   50% { transform: scale(1.2); text-shadow: 0 0 25px #ffea8a; }
 }
-
-.error { color: #ff8ba7; font-size: 1.2em; margin-top: 20px; }
-
-.scoreChanged { animation: pulse 1s ease-in-out; }
-
-@keyframes pulse {
-  0% { transform: scale(1); color: #bb8fff; text-shadow: 0 0 5px #bb8fff; }
-  50% { transform: scale(1.3); color: #ff6fff; text-shadow: 0 0 20px #ff6fff; }
-  100% { transform: scale(1); color: #bb8fff; text-shadow: 0 0 10px #bb8fff; }
-}
 </style>
 </head>
 <body>
-<header>Офіційні результати змагань з художньої гімнастики</header>
+<header>Sport Art Cup - 2026</header>
 
 <div class="scoreboard" id="scoreboard">
   <div class="decor">👑</div>
@@ -118,88 +92,82 @@ footer {
 <script>
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRz-4FumJ2c76o-bbGnbWWg_gw9nqxbEYMjdIaJi6Y5uMELcOfmiByk08qBfS8-MPt4vV3pBlJ_TuZT/pub?gid=1614929973&single=true&output=csv";
 
-let lastData = "";
-let previousData = ""; // Зберігаємо попередній стан, щоб уникнути відкатів
+let currentDisplayedData = "";
+let pendingData = "";
+let stableCount = 0;
 
 async function loadData() {
   const scoreboard = document.getElementById("scoreboard");
 
   try {
-    // Додаємо випадковий параметр, щоб обійти кеш браузера
-    const res = await fetch(SHEET_URL + "&nocache=" + Date.now(), {
-      cache: "no-store"
-    });
-
+    const res = await fetch(SHEET_URL + "&t=" + Date.now(), { cache: "no-store" });
     const text = await res.text();
     const rows = parseCSV(text);
 
-    // 👉 7-й рядок (індекс 6)
+    // Беремо 7-й рядок (індекс 6)
     const row = rows[6];
-    if (!row) throw new Error("Немає 7-го рядка");
+    if (!row) return;
 
     const fixedRow = Array.from({ length: 7 }, (_, i) => row[i] ?? "—");
-    const newData = JSON.stringify(fixedRow);
+    const incomingData = JSON.stringify(fixedRow);
 
-    // ОСНОВНИЙ ЗАХИСТ:
-    // Якщо нові дані збігаються з тими, що були ДО поточних (відкат назад), ігноруємо їх.
-    if (newData === lastData) return;
-    if (newData === previousData && lastData !== "") return;
+    // Якщо дані збігаються з тим, що вже на екрані — скидаємо лічильник стабільності
+    if (incomingData === currentDisplayedData) {
+        stableCount = 0;
+        return;
+    }
 
-    // Оновлюємо історію станів
-    previousData = lastData;
-    lastData = newData;
+    // Якщо ми бачимо нові дані (pendingData) вперше або вони повторюються
+    if (incomingData === pendingData) {
+        stableCount++;
+    } else {
+        pendingData = incomingData;
+        stableCount = 1;
+    }
 
-    let html = `<div class="decor">👑</div>`;
-    fixedRow.forEach(cell => {
-      html += `<div class="cell">${cell}</div>`;
-    });
+    // Тільки якщо нові дані прийшли стабільно 3 рази поспіль (близько 6-9 секунд), оновлюємо екран.
+    // Це дозволяє перечекати затримку оновлення кешу Google.
+    if (stableCount >= 3) {
+        currentDisplayedData = incomingData;
+        stableCount = 0;
+        
+        let html = `<div class="decor">👑</div>`;
+        fixedRow.forEach(cell => {
+            html += `<div class="cell">${cell}</div>`;
+        });
 
-    scoreboard.style.opacity = 0;
-    setTimeout(() => {
-      scoreboard.innerHTML = html;
-      scoreboard.style.opacity = 1;
-    }, 120);
+        scoreboard.style.opacity = 0;
+        setTimeout(() => {
+            scoreboard.innerHTML = html;
+            scoreboard.style.opacity = 1;
+        }, 120);
+    }
 
   } catch (err) {
-    console.error(err);
+    console.error("Помилка:", err);
   }
 }
 
-// 🔥 правильний CSV parser
 function parseCSV(text) {
   const rows = [];
   let row = [];
   let value = "";
   let inQuotes = false;
-
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
-    if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
-      row.push(value.trim());
-      value = "";
-    } else if ((char === '\n' || char === '\r') && !inQuotes) {
-      if (value || row.length) {
-        row.push(value.trim());
-        rows.push(row);
-        row = [];
-        value = "";
-      }
-    } else {
-      value += char;
-    }
+    if (char === '"') inQuotes = !inQuotes;
+    else if (char === ',' && !inQuotes) { row.push(value.trim()); value = ""; }
+    else if ((char === '\n' || char === '\r') && !inQuotes) {
+      if (value || row.length) { row.push(value.trim()); rows.push(row); row = []; value = ""; }
+    } else value += char;
   }
-  if (value || row.length) {
-    row.push(value.trim());
-    rows.push(row);
-  }
+  if (value || row.length) { row.push(value.trim()); rows.push(row); }
   return rows;
 }
 
 loadData();
-// Опитування кожні 3 секунди
-setInterval(loadData, 3000);
+// Опитування кожні 2.5 секунди
+setInterval(loadData, 2500);
 </script>
 </body>
 </html>
