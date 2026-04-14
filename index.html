@@ -130,13 +130,13 @@ async function loadData() {
 
     const text = await res.text();
 
-    const rows = text
-      .trim()
-      .split("\n")
-      .map(r => r.split(","));
+    // 🔥 НАДІЙНИЙ CSV парсер (підтримує коми в тексті)
+    const rows = parseCSV(text);
 
-    // 👉 беремо 7-й рядок (але захищено)
-    let row = rows[6] || [];
+    // 👉 7-й рядок
+    const row = rows[6];
+
+    if (!row) throw new Error("Немає 7-го рядка");
 
     const fixedRow = Array.from({ length: 7 }, (_, i) => row[i] ?? "—");
 
@@ -165,6 +165,41 @@ async function loadData() {
       <div class="cell">Помилка 😢<br>${err.message}</div>
     `;
   }
+}
+
+// 🔥 правильний CSV parser
+function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let value = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      row.push(value.trim());
+      value = "";
+    } else if ((char === '\n' || char === '\r') && !inQuotes) {
+      if (value || row.length) {
+        row.push(value.trim());
+        rows.push(row);
+        row = [];
+        value = "";
+      }
+    } else {
+      value += char;
+    }
+  }
+
+  if (value || row.length) {
+    row.push(value.trim());
+    rows.push(row);
+  }
+
+  return rows;
 }
 
 loadData();
