@@ -24,7 +24,8 @@ body {
   position: fixed;
   top: 20px;
   left: 20px;
-  width: 160px; /* SPORTART більший */
+  /* Збільшено зі 160px до 320px */
+  width: 320px; 
   height: auto;
   z-index: 1000;
   filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
@@ -34,7 +35,7 @@ body {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 110px; /* EstEvents менший */
+  width: 110px;
   height: auto;
   z-index: 1000;
   opacity: 0.9;
@@ -109,7 +110,8 @@ footer {
 }
 
 @media (max-width: 768px) {
-  .logo-sportart { width: 100px; top: 10px; left: 10px; }
+  /* Для мобільних пристроїв також пропорційно збільшено зі 100px до 200px */
+  .logo-sportart { width: 200px; top: 10px; left: 10px; }
   .logo-estevents { width: 80px; bottom: 10px; right: 10px; }
   header { font-size: 1.4em; }
   .cell { font-size: 1.2em; }
@@ -122,7 +124,7 @@ footer {
 <img src="logo_sportart.png.jpg" alt="Sportart Logo" class="logo-sportart">
 <img src="logo_estevents.png.png" alt="EstEvents Logo" class="logo-estevents">
 
-<header>Результати змагань</header>
+<header>Sport Art Cup - 2026</header>
 
 <div class="scoreboard" id="scoreboard">
   <div class="decor">👑</div>
