@@ -106,7 +106,7 @@ footer {
 </style>
 </head>
 <body>
-<header>Sport Art Cup - 2026</header>
+<header>Офіційні результати змагань з художньої гімнастики</header>
 
 <div class="scoreboard" id="scoreboard">
   <div class="decor">👑</div>
@@ -119,60 +119,49 @@ footer {
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRz-4FumJ2c76o-bbGnbWWg_gw9nqxbEYMjdIaJi6Y5uMELcOfmiByk08qBfS8-MPt4vV3pBlJ_TuZT/pub?gid=1614929973&single=true&output=csv";
 
 let lastData = "";
-let lastRequestTime = 0; // Змінна для відстеження останнього успішного запиту
+let previousData = ""; // Зберігаємо попередній стан, щоб уникнути відкатів
 
 async function loadData() {
   const scoreboard = document.getElementById("scoreboard");
-  const startTime = Date.now(); // Час початку поточного запиту
 
   try {
-    const res = await fetch(SHEET_URL + "&t=" + startTime, {
-      method: 'GET',
-      cache: 'no-store'
+    // Додаємо випадковий параметр, щоб обійти кеш браузера
+    const res = await fetch(SHEET_URL + "&nocache=" + Date.now(), {
+      cache: "no-store"
     });
 
     const text = await res.text();
-
-    // Якщо цей запит прийшов пізніше за той, що вже оброблений — ігноруємо його
-    if (startTime < lastRequestTime) return;
-    lastRequestTime = startTime;
-
     const rows = parseCSV(text);
 
-    // 👉 7-й рядок
+    // 👉 7-й рядок (індекс 6)
     const row = rows[6];
-
     if (!row) throw new Error("Немає 7-го рядка");
 
     const fixedRow = Array.from({ length: 7 }, (_, i) => row[i] ?? "—");
-
     const newData = JSON.stringify(fixedRow);
 
+    // ОСНОВНИЙ ЗАХИСТ:
+    // Якщо нові дані збігаються з тими, що були ДО поточних (відкат назад), ігноруємо їх.
     if (newData === lastData) return;
+    if (newData === previousData && lastData !== "") return;
 
+    // Оновлюємо історію станів
+    previousData = lastData;
     lastData = newData;
 
     let html = `<div class="decor">👑</div>`;
-
     fixedRow.forEach(cell => {
       html += `<div class="cell">${cell}</div>`;
     });
 
     scoreboard.style.opacity = 0;
-
     setTimeout(() => {
       scoreboard.innerHTML = html;
       scoreboard.style.opacity = 1;
     }, 120);
 
   } catch (err) {
-    // Помилки показуємо тільки якщо це був останній актуальний запит
-    if (startTime >= lastRequestTime) {
-        document.getElementById("scoreboard").innerHTML = `
-          <div class="decor">👑</div>
-          <div class="cell">Помилка 😢<br>${err.message}</div>
-        `;
-    }
+    console.error(err);
   }
 }
 
@@ -185,7 +174,6 @@ function parseCSV(text) {
 
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
-
     if (char === '"') {
       inQuotes = !inQuotes;
     } else if (char === ',' && !inQuotes) {
@@ -202,16 +190,15 @@ function parseCSV(text) {
       value += char;
     }
   }
-
   if (value || row.length) {
     row.push(value.trim());
     rows.push(row);
   }
-
   return rows;
 }
 
 loadData();
+// Опитування кожні 3 секунди
 setInterval(loadData, 3000);
 </script>
 </body>
