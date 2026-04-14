@@ -91,7 +91,7 @@ footer {
 </head>
 <body>
 
-<header>Результати змагань з художньої гімнастики</header>
+<header>Sport Art Cup - 2026</header>
 
 <div class="scoreboard" id="scoreboard">
   <div class="decor">👑</div>
@@ -103,7 +103,7 @@ footer {
 <footer>© 2025 EstEvents by Емма Щелецька</footer>
 
 <script>
-// Використовуйте ваше останнє посилання на скрипт
+// Використовуйте ваше посилання на скрипт
 const API_URL = "https://script.google.com/macros/s/AKfycby8bIfxUFNLKBZZ9OQn9r-Dqt7jsaJULJJ-yNHhIT8U7AFGkWf8aiNrbG7cVbxEw6Oc0w/exec";
 
 let lastData = "";
@@ -123,14 +123,9 @@ async function loadData() {
     const data = await res.json();
     if (!Array.isArray(data)) return;
 
+    // Просто беремо те, що прислала таблиця, без жодних змін форматів
     const fixedRow = Array.from({ length: 7 }, (_, i) => {
       let value = data[i];
-      
-      // Якщо це число, примусово робимо 3 знаки після коми (на всякий випадок і тут)
-      if (typeof value === 'number') {
-        return value.toFixed(3);
-      }
-      
       return value !== undefined && value !== null && String(value).trim() !== ""
         ? String(value).trim()
         : "—";
