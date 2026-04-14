@@ -22,7 +22,6 @@ body {
 
 header {
   flex-shrink: 0;
-  /* ПІДНЯТО ЛОГОТИП (від’ємний відступ для підйому вгору) */
   margin-top: -70px; 
   margin-bottom: 2px; 
   animation: fadeIn 1.5s ease-in-out;
@@ -57,8 +56,9 @@ header {
   flex-direction: column;
   justify-content: center; 
   transition: filter 0.5s ease-in-out;
-  /* ПІДНЯТО РАМКУ ЩЕ ВИЩЕ (додано ~2 см до попереднього значення) */
   margin-top: -140px; 
+  /* Додано невеликий відступ знизу, щоб футер не зливався з рамкою */
+  margin-bottom: 10px; 
 }
 
 .cell-container {
@@ -90,14 +90,12 @@ header {
 }
 
 footer {
-  position: fixed;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
+  /* ФУТЕР ТЕПЕР ПІД РАМКОЮ */
   color: #bdaaff;
   font-size: 1.2em; 
   font-weight: 600;
   opacity: 0.7;
+  flex-shrink: 0;
 }
 
 @keyframes fadeUp {
@@ -136,7 +134,7 @@ footer {
 <div class="scoreboard" id="scoreboard">
   <div class="decor">👑</div>
   <div id="content" class="cell-container">
-    <div class="cell">ЗАВАНТАЖЕННЯ...</div>
+    <div class="cell">ОЧІКУВАННЯ...</div>
   </div>
 </div>
 
