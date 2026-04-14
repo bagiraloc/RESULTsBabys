@@ -81,7 +81,7 @@ footer {
 </head>
 <body>
 
-<header>Офіційні результати змагань з художньої гімнастики</header>
+<header>результати змагань з художньої гімнастики</header>
 
 <div class="scoreboard" id="scoreboard">
   <div class="decor">👑</div>
@@ -91,7 +91,7 @@ footer {
 <footer>© 2025 EstEvents by Емма Щелецька</footer>
 
 <script>
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRz-4FumJ2c76o-bbGnbWWg_gw9nqxbEYMjdIaJi6Y5uMELcOfmiByk08qBfS8-MPt4vV3pBlJ_TuZT/pub?gid=1614929973&single=true&output=csv";
+const API_URL = "https://script.google.com/macros/s/AKfycbzbcHHPqHcRlhRl3r2ukqNG6bCbCY8gkiR2c9-q9D0OLcTwee-Zl7yvi1_jo0VKxCI-LQ/exec";
 
 let lastData = "";
 
@@ -99,18 +99,27 @@ async function loadData() {
   const scoreboard = document.getElementById("scoreboard");
 
   try {
-    const res = await fetch(SHEET_URL + "&t=" + Date.now(), {
+    const res = await fetch(API_URL + "?t=" + Date.now(), {
+      method: "GET",
       cache: "no-store"
     });
 
-    const text = await res.text();
+    if (!res.ok) {
+      throw new Error("HTTP " + res.status);
+    }
 
-    const rows = parseCSV(text);
+    const data = await res.json();
 
-    // 👉 беремо 7-й рядок (але стабільно)
-    const row = rows[6] || [];
+    if (!Array.isArray(data)) {
+      throw new Error("Невірний формат даних");
+    }
 
-    const fixedRow = Array.from({ length: 7 }, (_, i) => row[i] ?? "—");
+    const fixedRow = Array.from({ length: 7 }, (_, i) => {
+      const value = data[i];
+      return value !== undefined && value !== null && String(value).trim() !== ""
+        ? String(value).trim()
+        : "—";
+    });
 
     const newData = JSON.stringify(fixedRow);
 
@@ -118,7 +127,6 @@ async function loadData() {
     lastData = newData;
 
     let html = `<div class="decor">👑</div>`;
-
     fixedRow.forEach(v => {
       html += `<div class="cell">${v}</div>`;
     });
@@ -131,44 +139,9 @@ async function loadData() {
     }, 120);
 
   } catch (e) {
-    document.getElementById("scoreboard").innerHTML =
+    scoreboard.innerHTML =
       `<div class="decor">👑</div><div class="cell">Помилка завантаження</div>`;
   }
-}
-
-/* 🔥 НАДІЙНИЙ CSV ПАРСЕР */
-function parseCSV(text) {
-  const rows = [];
-  let row = [];
-  let value = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-
-    if (c === '"') {
-      inQuotes = !inQuotes;
-    } else if (c === "," && !inQuotes) {
-      row.push(value);
-      value = "";
-    } else if ((c === "\n" || c === "\r") && !inQuotes) {
-      if (value !== "" || row.length) {
-        row.push(value);
-        rows.push(row);
-        row = [];
-        value = "";
-      }
-    } else {
-      value += c;
-    }
-  }
-
-  if (value || row.length) {
-    row.push(value);
-    rows.push(row);
-  }
-
-  return rows;
 }
 
 loadData();
