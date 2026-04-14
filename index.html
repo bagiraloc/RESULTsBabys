@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Оцінки спортсменів — Художня гімнастика</title>
-
 <style>
 body {
   margin: 0;
@@ -41,6 +40,7 @@ header {
   position: relative;
 }
 
+/* Гімнастка (анімація під час оновлення) */
 .spinner {
   width: 120px;
   height: 120px;
@@ -94,19 +94,19 @@ footer {
   50% { transform: scale(1.2); text-shadow: 0 0 25px #ffea8a; }
 }
 
+.error { color: #ff8ba7; font-size: 1.2em; margin-top: 20px; }
+
 .scoreChanged { animation: pulse 1s ease-in-out; }
 
 @keyframes pulse {
-  0% { transform: scale(1); color: #bb8fff; }
-  50% { transform: scale(1.3); color: #ff6fff; }
-  100% { transform: scale(1); color: #bb8fff; }
+  0% { transform: scale(1); color: #bb8fff; text-shadow: 0 0 5px #bb8fff; }
+  50% { transform: scale(1.3); color: #ff6fff; text-shadow: 0 0 20px #ff6fff; }
+  100% { transform: scale(1); color: #bb8fff; text-shadow: 0 0 10px #bb8fff; }
 }
 </style>
 </head>
-
 <body>
-
-<header>Sport Art Cup - 2026</header>
+<header>Офіційні результати змагань з художньої гімнастики</header>
 
 <div class="scoreboard" id="scoreboard">
   <div class="decor">👑</div>
@@ -116,94 +116,111 @@ footer {
 <footer>© 2025 EstEvents by Емма Щелецька</footer>
 
 <script>
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRz-4FumJ2c76o-bbGnbWWg_gw9nqxbEYMjdIaJi6Y5uMELcOfmiByk08qBfS8-MPt4vV3pBlJ_TuZT/pub?gid=1614929973&single=true&output=csv";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRz-4FumJ2c76o-bbGnbWWg_gw9nqxbEYMjdIaJi6Y5uMELcOfmiByk08qBfS8-MPt4vV3pBlJ_TuZT/pub?gid=1614929973&single=true&output=csv";
 
-let lastData = "";
+let oldRow = [];
 
-async function loadData() {
-  const scoreboard = document.getElementById("scoreboard");
-
-  try {
-    const res = await fetch(SHEET_URL + "&t=" + Date.now(), {
-      cache: "no-store"
-    });
-
-    const text = await res.text();
-
-    // 🔥 НАДІЙНИЙ CSV парсер (підтримує коми в тексті)
-    const rows = parseCSV(text);
-
-    // 👉 7-й рядок
-    const row = rows[6];
-
-    if (!row) throw new Error("Немає 7-го рядка");
-
-    const fixedRow = Array.from({ length: 7 }, (_, i) => row[i] ?? "—");
-
-    const newData = JSON.stringify(fixedRow);
-
-    if (newData === lastData) return;
-
-    lastData = newData;
-
-    let html = `<div class="decor">👑</div>`;
-
-    fixedRow.forEach(cell => {
-      html += `<div class="cell">${cell}</div>`;
-    });
-
-    scoreboard.style.opacity = 0;
-
-    setTimeout(() => {
-      scoreboard.innerHTML = html;
-      scoreboard.style.opacity = 1;
-    }, 120);
-
-  } catch (err) {
-    document.getElementById("scoreboard").innerHTML = `
-      <div class="decor">👑</div>
-      <div class="cell">Помилка 😢<br>${err.message}</div>
-    `;
-  }
-}
-
-// 🔥 правильний CSV parser
 function parseCSV(text) {
   const rows = [];
   let row = [];
-  let value = "";
+  let cell = "";
   let inQuotes = false;
 
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
+    const next = text[i + 1];
 
     if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
-      row.push(value.trim());
-      value = "";
-    } else if ((char === '\n' || char === '\r') && !inQuotes) {
-      if (value || row.length) {
-        row.push(value.trim());
-        rows.push(row);
-        row = [];
-        value = "";
+      if (inQuotes && next === '"') {
+        cell += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
       }
+    } else if (char === "," && !inQuotes) {
+      row.push(cell);
+      cell = "";
+    } else if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && next === "\n") i++;
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = "";
     } else {
-      value += char;
+      cell += char;
     }
   }
 
-  if (value || row.length) {
-    row.push(value.trim());
+  if (cell.length > 0 || row.length > 0) {
+    row.push(cell);
     rows.push(row);
   }
 
   return rows;
 }
 
+async function loadData() {
+  const scoreboard = document.getElementById("scoreboard");
+
+  scoreboard.style.opacity = 0;
+  scoreboard.innerHTML = `
+    <div class="decor">👑</div>
+    <div class="spinner"></div>
+    <div class="cell" style="color:#ffbfff;">Оновлення даних...</div>
+  `;
+
+  try {
+    const res = await fetch(CSV_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const csvText = await res.text();
+    const rows = parseCSV(csvText);
+
+    if (!rows[6]) {
+      showLoading("Немає даних у 7 рядку таблиці 😢");
+      return;
+    }
+
+    let row = rows[6].map(cell => cell.trim() || "—");
+
+    const filledCount = row.filter(v => v && v.trim() !== "—").length;
+    if (filledCount < 1 && oldRow.length) {
+      console.warn("Отримано неповні дані — оновлення пропущено");
+      return;
+    }
+
+    await new Promise(r => setTimeout(r, 1000));
+
+    let html = `<div class="decor">👑</div>`;
+    row.forEach((cell, index) => {
+      const changed = oldRow[index] !== undefined && oldRow[index] !== cell;
+      html += `<div class="cell${changed ? ' scoreChanged' : ''}">${cell}</div>`;
+    });
+
+    scoreboard.style.opacity = 0;
+    setTimeout(() => {
+      scoreboard.innerHTML = html;
+      scoreboard.style.opacity = 1;
+    }, 250);
+
+    oldRow = row;
+  } catch (err) {
+    showLoading("Не вдалося завантажити дані 😢<br>" + err.message);
+  }
+}
+
+function showLoading(message) {
+  const scoreboard = document.getElementById("scoreboard");
+  scoreboard.innerHTML = `
+    <div class="decor">👑</div>
+    <div class="spinner"></div>
+    <div class="cell" style="color:#ffbfff;">${message}</div>
+  `;
+}
+
+showLoading("Завантаження...");
 loadData();
-setInterval(loadData, 3000);
+setInterval(loadData, 15000);
 </script>
 </body>
 </html>
