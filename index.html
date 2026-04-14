@@ -106,7 +106,7 @@ footer {
 </style>
 </head>
 <body>
-<header>Офіційні результати змагань з художньої гімнастики</header>
+<header>Sport Art Cup - 2026</header>
 
 <div class="scoreboard" id="scoreboard">
   <div class="decor">👑</div>
@@ -116,110 +116,61 @@ footer {
 <footer>© 2025 EstEvents by Емма Щелецька</footer>
 
 <script>
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRz-4FumJ2c76o-bbGnbWWg_gw9nqxbEYMjdIaJi6Y5uMELcOfmiByk08qBfS8-MPt4vV3pBlJ_TuZT/pub?gid=1614929973&single=true&output=csv";
+// Ваше нове посилання на Apps Script
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzbcHHPqHcRlhRl3r2ukqNG6bCbCY8gkiR2c9-q9D0OLcTwee-Zl7yvi1_jo0VKxCI-LQ/exec";
 
-let oldRow = [];
-
-function parseCSV(text) {
-  const rows = [];
-  let row = [];
-  let cell = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    const next = text[i + 1];
-
-    if (char === '"') {
-      if (inQuotes && next === '"') {
-        cell += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (char === "," && !inQuotes) {
-      row.push(cell);
-      cell = "";
-    } else if ((char === "\n" || char === "\r") && !inQuotes) {
-      if (char === "\r" && next === "\n") i++;
-      row.push(cell);
-      rows.push(row);
-      row = [];
-      cell = "";
-    } else {
-      cell += char;
-    }
-  }
-
-  if (cell.length > 0 || row.length > 0) {
-    row.push(cell);
-    rows.push(row);
-  }
-
-  return rows;
-}
+let lastData = "";
 
 async function loadData() {
   const scoreboard = document.getElementById("scoreboard");
 
-  scoreboard.style.opacity = 0;
-  scoreboard.innerHTML = `
-    <div class="decor">👑</div>
-    <div class="spinner"></div>
-    <div class="cell" style="color:#ffbfff;">Оновлення даних...</div>
-  `;
-
   try {
-    const freshUrl = CSV_URL + "&t=" + Date.now();
-    const res = await fetch(freshUrl, {
-      method: "GET",
-      cache: "no-store"
+    // Робимо запит до скрипта. Додаємо Date.now(), щоб браузер точно не кешував результат.
+    const res = await fetch(SCRIPT_URL + "?t=" + Date.now());
+    
+    // Отримуємо чистий масив даних напряму (без парсингу CSV!)
+    const row = await res.json(); 
+
+    // Перевіряємо, чи взагалі є дані
+    if (!row || !Array.isArray(row) || row.length === 0) return;
+
+    // Перетворюємо порожні клітинки на прочерки. 
+    // Завжди виводимо 7 стовпців, навіть якщо деякі з них порожні.
+    const fixedRow = Array.from({ length: 7 }, (_, i) => {
+        return (row[i] !== undefined && row[i] !== "") ? row[i] : "—";
     });
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const newData = JSON.stringify(fixedRow);
 
-    const csvText = await res.text();
-    const rows = parseCSV(csvText);
+    // Якщо дані не змінилися з минулої перевірки — нічого не малюємо заново
+    if (newData === lastData) return;
+    lastData = newData;
 
-    if (!rows[6]) {
-      showLoading("Немає даних у 7 рядку таблиці 😢");
-      return;
-    }
-
-    let row = rows[6].map(cell => cell.trim() || "—");
-
-    await new Promise(r => setTimeout(r, 1000));
-
+    // Формуємо новий HTML
     let html = `<div class="decor">👑</div>`;
-    row.forEach((cell, index) => {
-      const changed = oldRow[index] !== undefined && oldRow[index] !== cell;
-      html += `<div class="cell${changed ? ' scoreChanged' : ''}">${cell}</div>`;
+    fixedRow.forEach(cell => {
+      html += `<div class="cell">${cell}</div>`;
     });
 
+    // Плавно приховуємо старі дані і показуємо нові
     scoreboard.style.opacity = 0;
     setTimeout(() => {
       scoreboard.innerHTML = html;
       scoreboard.style.opacity = 1;
-    }, 250);
+    }, 120);
 
-    oldRow = row;
   } catch (err) {
-    showLoading("Не вдалося завантажити дані 😢<br>" + err.message);
+    console.error("Помилка з'єднання:", err);
+    // Якщо скрипт не працює, можемо вивести помилку на екран, щоб ви знали.
+    // scoreboard.innerHTML = `<div class="cell" style="color: red;">Помилка зв'язку з таблицею</div>`;
   }
 }
 
-function showLoading(message) {
-  const scoreboard = document.getElementById("scoreboard");
-  scoreboard.innerHTML = `
-    <div class="decor">👑</div>
-    <div class="spinner"></div>
-    <div class="cell" style="color:#ffbfff;">${message}</div>
-  `;
-}
-
-showLoading("Завантаження...");
+// Запускаємо відразу при відкритті сторінки
 loadData();
-setInterval(loadData, 15000);
+
+// Потім перевіряємо кожні 2 секунди
+setInterval(loadData, 2000);
 </script>
 </body>
 </html>
