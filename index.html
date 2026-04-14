@@ -133,9 +133,23 @@ async function loadData() {
 
     const rows = json.table.rows;
 
-    const row = rows[6] ? rows[6].c.map(c => c ? c.v : "—") : [];
+    // 🔥 шукаємо перший нормальний рядок з даними
+    let foundRow = null;
 
-    const fixedRow = Array.from({ length: 7 }, (_, i) => row[i] ?? "—");
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i]?.c?.map(c => c ? c.v : "—") || [];
+      
+      const hasData = row.some(v => v !== "—" && v !== null && v !== "");
+
+      if (hasData) {
+        foundRow = row;
+        break; // беремо ПЕРШИЙ нормальний рядок
+      }
+    }
+
+    if (!foundRow) return;
+
+    const fixedRow = Array.from({ length: 7 }, (_, i) => foundRow[i] ?? "—");
 
     const newData = JSON.stringify(fixedRow);
 
@@ -157,9 +171,9 @@ async function loadData() {
     }, 120);
 
   } catch (err) {
-    document.getElementById("scoreboard").innerHTML = `
+    scoreboard.innerHTML = `
       <div class="decor">👑</div>
-      <div class="cell">Помилка завантаження 😢<br>${err.message}</div>
+      <div class="cell">Помилка 😢<br>${err.message}</div>
     `;
   }
 }
@@ -167,6 +181,5 @@ async function loadData() {
 loadData();
 setInterval(loadData, 2000);
 </script>
-
 </body>
 </html>
