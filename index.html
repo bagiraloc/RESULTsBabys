@@ -116,42 +116,37 @@ footer {
 <footer>© 2025 EstEvents by Емма Щелецька</footer>
 
 <script>
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRz-4FumJ2c76o-bbGnbWWg_gw9nqxbEYMjdIaJi6Y5uMELcOfmiByk08qBfS8-MPt4vV3pBlJ_TuZT/pub?gid=1614929973&single=true&output=csv&t=" + Date.now();
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/1gBNHtvbDQ5welQn09qDcLFtVPMNwGL3OSI8zeC1pZN4/gviz/tq?tqx=out:json";
 
-let oldRow = [];
+let lastData = "";
 
 async function loadData() {
   const scoreboard = document.getElementById("scoreboard");
 
-  scoreboard.style.opacity = 0;
-  scoreboard.innerHTML = `
-    <div class="decor">👑</div>
-    <div class="spinner"></div>
-    <div class="cell" style="color:#ffbfff;">Оновлення даних...</div>
-  `;
-
   try {
     const res = await fetch(SHEET_URL, { cache: "no-store" });
-    if (!res.ok) throw new Error("HTTP " + res.status);
-
     const text = await res.text();
 
-    // CSV -> рядки
-    const rows = text.trim().split("\n").map(r => r.split(","));
+    const json = JSON.parse(
+      text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1)
+    );
 
-    // 👉 7-й рядок (DISPLAY лист = вже у CSV)
-    let row = rows[6] || [];
+    const rows = json.table.rows;
 
-    // 7 колонок
-    row = Array.from({ length: 7 }, (_, i) => row[i] || "—");
+    const row = rows[6] ? rows[6].c.map(c => c ? c.v : "—") : [];
 
-    await new Promise(r => setTimeout(r, 1000));
+    const fixedRow = Array.from({ length: 7 }, (_, i) => row[i] ?? "—");
+
+    const newData = JSON.stringify(fixedRow);
+
+    if (newData === lastData) return;
+
+    lastData = newData;
 
     let html = `<div class="decor">👑</div>`;
 
-    row.forEach((cell, index) => {
-      const changed = oldRow[index] !== undefined && oldRow[index] !== cell;
-      html += `<div class="cell${changed ? ' scoreChanged' : ''}">${cell}</div>`;
+    fixedRow.forEach(cell => {
+      html += `<div class="cell">${cell}</div>`;
     });
 
     scoreboard.style.opacity = 0;
@@ -159,12 +154,10 @@ async function loadData() {
     setTimeout(() => {
       scoreboard.innerHTML = html;
       scoreboard.style.opacity = 1;
-    }, 250);
-
-    oldRow = row;
+    }, 120);
 
   } catch (err) {
-    scoreboard.innerHTML = `
+    document.getElementById("scoreboard").innerHTML = `
       <div class="decor">👑</div>
       <div class="cell">Помилка завантаження 😢<br>${err.message}</div>
     `;
@@ -172,7 +165,7 @@ async function loadData() {
 }
 
 loadData();
-setInterval(loadData, 15000);
+setInterval(loadData, 2000);
 </script>
 
 </body>
