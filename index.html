@@ -19,18 +19,19 @@ body {
   overflow: hidden;
 }
 
-/* ЛОГОТИПИ */
-.logo-sportart {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  /* Збільшено зі 160px до 320px */
-  width: 320px; 
-  height: auto;
-  z-index: 1000;
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+/* ЦЕНТРАЛЬНИЙ ЛОГОТИП ВЕРХУ */
+header {
+  margin-bottom: 20px;
+  animation: fadeIn 1.5s ease-in-out;
 }
 
+.header-logo {
+  width: 450px; /* Збільшений розмір для центру */
+  height: auto;
+  filter: drop-shadow(0 0 15px rgba(194, 153, 255, 0.4));
+}
+
+/* ЛОГОТИП ESTEVENTS (ВНИЗУ) */
 .logo-estevents {
   position: fixed;
   bottom: 20px;
@@ -41,20 +42,11 @@ body {
   opacity: 0.9;
 }
 
-header {
-  color: #fff;
-  font-size: 2.2em;
-  font-weight: 600;
-  margin-bottom: 30px;
-  text-shadow: 0 0 15px #c299ff;
-  animation: fadeIn 1.5s ease-in-out;
-}
-
 .scoreboard {
   background: rgba(255, 255, 255, 0.05);
   border: 2px solid rgba(200, 150, 255, 0.4);
   border-radius: 20px;
-  padding: 40px 60px;
+  padding: 30px 60px;
   box-shadow: 0 0 40px rgba(160, 80, 255, 0.2);
   backdrop-filter: blur(15px);
   min-width: 60%;
@@ -73,7 +65,7 @@ header {
 }
 
 .cell {
-  font-size: 1.9em;
+  font-size: 2em;
   color: #bb8fff;
   font-weight: 600;
   text-shadow: 0 0 10px rgba(187, 143, 255, 0.3);
@@ -83,12 +75,12 @@ header {
 .decor {
   font-size: 2.5em;
   color: #ffd700;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   animation: pulseStar 2s infinite ease-in-out;
 }
 
 footer {
-  margin-top: 40px;
+  margin-top: 30px;
   color: #bdaaff;
   font-size: 0.9em;
   opacity: 0.7;
@@ -100,8 +92,8 @@ footer {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes pulseStar {
@@ -110,21 +102,20 @@ footer {
 }
 
 @media (max-width: 768px) {
-  /* Для мобільних пристроїв також пропорційно збільшено зі 100px до 200px */
-  .logo-sportart { width: 200px; top: 10px; left: 10px; }
+  .header-logo { width: 280px; }
   .logo-estevents { width: 80px; bottom: 10px; right: 10px; }
-  header { font-size: 1.4em; }
-  .cell { font-size: 1.2em; }
+  .cell { font-size: 1.4em; }
   .scoreboard { padding: 20px; width: 85%; }
 }
 </style>
 </head>
 <body>
 
-<img src="logo_sportart.png.jpg" alt="Sportart Logo" class="logo-sportart">
-<img src="logo_estevents.png.png" alt="EstEvents Logo" class="logo-estevents">
+<header>
+  <img src="logo_sportart.png.jpg" alt="Sport Art Cup 2026" class="header-logo">
+</header>
 
-<header>Sport Art Cup - 2026</header>
+<img src="logo_estevents.png.png" alt="EstEvents Logo" class="logo-estevents">
 
 <div class="scoreboard" id="scoreboard">
   <div class="decor">👑</div>
