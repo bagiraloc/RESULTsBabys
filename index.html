@@ -106,7 +106,7 @@ footer {
 </style>
 </head>
 <body>
-<header>Офіційні результати змагань з художньої гімнастики</header>
+<header>Sport Art Cup - 2026</header>
 
 <div class="scoreboard" id="scoreboard">
   <div class="decor">👑</div>
@@ -119,22 +119,23 @@ footer {
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRz-4FumJ2c76o-bbGnbWWg_gw9nqxbEYMjdIaJi6Y5uMELcOfmiByk08qBfS8-MPt4vV3pBlJ_TuZT/pub?gid=1614929973&single=true&output=csv";
 
 let lastData = "";
+let lastRequestTime = 0; // Змінна для відстеження останнього успішного запиту
 
 async function loadData() {
   const scoreboard = document.getElementById("scoreboard");
+  const startTime = Date.now(); // Час початку поточного запиту
 
   try {
-    // Додано cache: "no-cache" та заголовки для примусового оновлення
-    const res = await fetch(SHEET_URL + "&cachebuster=" + Date.now(), {
+    const res = await fetch(SHEET_URL + "&t=" + startTime, {
       method: 'GET',
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      }
+      cache: 'no-store'
     });
 
     const text = await res.text();
+
+    // Якщо цей запит прийшов пізніше за той, що вже оброблений — ігноруємо його
+    if (startTime < lastRequestTime) return;
+    lastRequestTime = startTime;
 
     const rows = parseCSV(text);
 
@@ -165,10 +166,13 @@ async function loadData() {
     }, 120);
 
   } catch (err) {
-    document.getElementById("scoreboard").innerHTML = `
-      <div class="decor">👑</div>
-      <div class="cell">Помилка 😢<br>${err.message}</div>
-    `;
+    // Помилки показуємо тільки якщо це був останній актуальний запит
+    if (startTime >= lastRequestTime) {
+        document.getElementById("scoreboard").innerHTML = `
+          <div class="decor">👑</div>
+          <div class="cell">Помилка 😢<br>${err.message}</div>
+        `;
+    }
   }
 }
 
