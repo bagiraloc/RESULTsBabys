@@ -40,6 +40,22 @@ header {
   position: relative;
 }
 
+/* Гімнастка (анімація під час оновлення) */
+.spinner {
+  width: 120px;
+  height: 120px;
+  margin: 30px auto;
+  background-image: url('https://i.imgur.com/XavZj7E.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  animation: spinGymnast 2s linear infinite;
+}
+
+@keyframes spinGymnast {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .cell {
   font-size: 1.6em;
   color: #bb8fff;
@@ -77,10 +93,20 @@ footer {
   0%, 100% { transform: scale(1); text-shadow: 0 0 10px #ffd700; }
   50% { transform: scale(1.2); text-shadow: 0 0 25px #ffea8a; }
 }
+
+.error { color: #ff8ba7; font-size: 1.2em; margin-top: 20px; }
+
+.scoreChanged { animation: pulse 1s ease-in-out; }
+
+@keyframes pulse {
+  0% { transform: scale(1); color: #bb8fff; text-shadow: 0 0 5px #bb8fff; }
+  50% { transform: scale(1.3); color: #ff6fff; text-shadow: 0 0 20px #ff6fff; }
+  100% { transform: scale(1); color: #bb8fff; text-shadow: 0 0 10px #bb8fff; }
+}
 </style>
 </head>
 <body>
-<header>Sport Art Cup - 2026</header>
+<header>Офіційні результати змагань з художньої гімнастики</header>
 
 <div class="scoreboard" id="scoreboard">
   <div class="decor">👑</div>
@@ -90,84 +116,110 @@ footer {
 <footer>© 2025 EstEvents by Емма Щелецька</footer>
 
 <script>
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRz-4FumJ2c76o-bbGnbWWg_gw9nqxbEYMjdIaJi6Y5uMELcOfmiByk08qBfS8-MPt4vV3pBlJ_TuZT/pub?gid=1614929973&single=true&output=csv";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRz-4FumJ2c76o-bbGnbWWg_gw9nqxbEYMjdIaJi6Y5uMELcOfmiByk08qBfS8-MPt4vV3pBlJ_TuZT/pub?gid=1614929973&single=true&output=csv";
 
-let currentDisplayedData = "";
-let pendingData = "";
-let stableCount = 0;
-
-async function loadData() {
-  const scoreboard = document.getElementById("scoreboard");
-
-  try {
-    const res = await fetch(SHEET_URL + "&t=" + Date.now(), { cache: "no-store" });
-    const text = await res.text();
-    const rows = parseCSV(text);
-
-    // Беремо 7-й рядок (індекс 6)
-    const row = rows[6];
-    if (!row) return;
-
-    const fixedRow = Array.from({ length: 7 }, (_, i) => row[i] ?? "—");
-    const incomingData = JSON.stringify(fixedRow);
-
-    // Якщо дані збігаються з тим, що вже на екрані — скидаємо лічильник стабільності
-    if (incomingData === currentDisplayedData) {
-        stableCount = 0;
-        return;
-    }
-
-    // Якщо ми бачимо нові дані (pendingData) вперше або вони повторюються
-    if (incomingData === pendingData) {
-        stableCount++;
-    } else {
-        pendingData = incomingData;
-        stableCount = 1;
-    }
-
-    // Тільки якщо нові дані прийшли стабільно 3 рази поспіль (близько 6-9 секунд), оновлюємо екран.
-    // Це дозволяє перечекати затримку оновлення кешу Google.
-    if (stableCount >= 3) {
-        currentDisplayedData = incomingData;
-        stableCount = 0;
-        
-        let html = `<div class="decor">👑</div>`;
-        fixedRow.forEach(cell => {
-            html += `<div class="cell">${cell}</div>`;
-        });
-
-        scoreboard.style.opacity = 0;
-        setTimeout(() => {
-            scoreboard.innerHTML = html;
-            scoreboard.style.opacity = 1;
-        }, 120);
-    }
-
-  } catch (err) {
-    console.error("Помилка:", err);
-  }
-}
+let oldRow = [];
 
 function parseCSV(text) {
   const rows = [];
   let row = [];
-  let value = "";
+  let cell = "";
   let inQuotes = false;
+
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
-    if (char === '"') inQuotes = !inQuotes;
-    else if (char === ',' && !inQuotes) { row.push(value.trim()); value = ""; }
-    else if ((char === '\n' || char === '\r') && !inQuotes) {
-      if (value || row.length) { row.push(value.trim()); rows.push(row); row = []; value = ""; }
-    } else value += char;
+    const next = text[i + 1];
+
+    if (char === '"') {
+      if (inQuotes && next === '"') {
+        cell += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === "," && !inQuotes) {
+      row.push(cell);
+      cell = "";
+    } else if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && next === "\n") i++;
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += char;
+    }
   }
-  if (value || row.length) { row.push(value.trim()); rows.push(row); }
+
+  if (cell.length > 0 || row.length > 0) {
+    row.push(cell);
+    rows.push(row);
+  }
+
   return rows;
 }
 
+async function loadData() {
+  const scoreboard = document.getElementById("scoreboard");
+
+  scoreboard.style.opacity = 0;
+  scoreboard.innerHTML = `
+    <div class="decor">👑</div>
+    <div class="spinner"></div>
+    <div class="cell" style="color:#ffbfff;">Оновлення даних...</div>
+  `;
+
+  try {
+    const freshUrl = CSV_URL + "&t=" + Date.now();
+    const res = await fetch(freshUrl, {
+      method: "GET",
+      cache: "no-store"
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const csvText = await res.text();
+    const rows = parseCSV(csvText);
+
+    if (!rows[6]) {
+      showLoading("Немає даних у 7 рядку таблиці 😢");
+      return;
+    }
+
+    let row = rows[6].map(cell => cell.trim() || "—");
+
+    await new Promise(r => setTimeout(r, 1000));
+
+    let html = `<div class="decor">👑</div>`;
+    row.forEach((cell, index) => {
+      const changed = oldRow[index] !== undefined && oldRow[index] !== cell;
+      html += `<div class="cell${changed ? ' scoreChanged' : ''}">${cell}</div>`;
+    });
+
+    scoreboard.style.opacity = 0;
+    setTimeout(() => {
+      scoreboard.innerHTML = html;
+      scoreboard.style.opacity = 1;
+    }, 250);
+
+    oldRow = row;
+  } catch (err) {
+    showLoading("Не вдалося завантажити дані 😢<br>" + err.message);
+  }
+}
+
+function showLoading(message) {
+  const scoreboard = document.getElementById("scoreboard");
+  scoreboard.innerHTML = `
+    <div class="decor">👑</div>
+    <div class="spinner"></div>
+    <div class="cell" style="color:#ffbfff;">${message}</div>
+  `;
+}
+
+showLoading("Завантаження...");
 loadData();
-// Опитування кожні 2.5 секунди
-setInterval(loadData, 2500);
+setInterval(loadData, 15000);
 </script>
 </body>
 </html>
