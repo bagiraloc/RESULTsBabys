@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sportart Rhythmic — Результати</title>
+<title>Sportart Rhythmic — LIVE</title>
 <style>
 body {
   margin: 0;
   padding: 0;
   font-family: "Poppins", sans-serif;
   background: radial-gradient(circle at top, #1a082b 0%, #0c0215 100%);
-  color: #e3cfff;
+  color: #ffffff;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Центрує вміст по вертикалі */
+  justify-content: flex-start; /* Притискаємо все ближче до верху */
   align-items: center;
   height: 100vh;
   text-align: center;
@@ -21,81 +21,85 @@ body {
 }
 
 header {
-  flex-shrink: 0; /* Не дає логотипу стискатися */
-  margin-bottom: 10px; /* Зменшений відступ */
+  margin-top: 10px; /* Мінімальний відступ від верхнього краю */
+  margin-bottom: -10px; /* "Підтягуємо" таблицю ближче до логотипа */
   animation: fadeIn 1.5s ease-in-out;
 }
 
 .header-logo {
-  width: 380px; /* Оптимальний розмір, щоб не тиснути на таблицю */
+  width: 600px; /* Ще більший логотип для 4-метрового екрана */
   height: auto;
-  filter: drop-shadow(0 0 15px rgba(194, 153, 255, 0.4));
+  filter: drop-shadow(0 0 20px rgba(194, 153, 255, 0.5));
 }
 
 .logo-estevents {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 100px;
+  bottom: 30px;
+  right: 30px;
+  width: 150px;
   height: auto;
-  z-index: 1000;
   opacity: 0.8;
 }
 
 .scoreboard {
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid rgba(200, 150, 255, 0.4);
-  border-radius: 20px;
-  padding: 25px 50px; /* Трохи компактніші відступи */
-  box-shadow: 0 0 40px rgba(160, 80, 255, 0.2);
-  backdrop-filter: blur(15px);
-  min-width: 55%;
-  max-height: 70vh; /* Щоб не виходила за межі екрана */
-  overflow-y: auto; /* На випадок задовгого списку */
-  transition: filter 0.5s ease-in-out, transform 0.5s ease-in-out;
-}
-
-.updating {
-  filter: blur(8px);
-  transform: scale(0.99);
+  background: rgba(255, 255, 255, 0.07);
+  border: 4px solid rgba(200, 150, 255, 0.6); /* Товстіша рамка */
+  border-radius: 40px;
+  padding: 40px 80px;
+  box-shadow: 0 0 60px rgba(160, 80, 255, 0.3);
+  backdrop-filter: blur(20px);
+  min-width: 80%; /* Ширша таблиця для масштабу */
+  transition: filter 0.4s ease-in-out;
 }
 
 .cell-container {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* Менша відстань між рядками */
+  gap: 15px;
 }
 
 .cell {
-  font-size: 1.8em;
-  color: #bb8fff;
-  font-weight: 600;
-  text-shadow: 0 0 10px rgba(187, 143, 255, 0.3);
+  /* Гігантський та надзвичайно жирний текст для великих екранів */
+  font-size: 4.5em; 
+  color: #ffffff;
+  font-weight: 900; 
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 4px 4px 15px rgba(0, 0, 0, 0.5);
   animation: fadeUp 0.6s ease-out forwards;
 }
 
-.decor {
-  font-size: 2em;
+/* Перший рядок (зазвичай ім'я або заголовок) можна зробити золотим */
+.cell:first-child {
   color: #ffd700;
-  margin-bottom: 10px;
+  font-size: 5em;
+}
+
+.decor {
+  font-size: 4em;
+  margin-bottom: 5px;
   animation: pulseStar 2s infinite ease-in-out;
 }
 
 footer {
-  margin-top: 20px;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   color: #bdaaff;
-  font-size: 0.85em;
-  opacity: 0.6;
+  font-size: 1.5em;
+  font-weight: 600;
+  opacity: 0.7;
 }
 
 @keyframes fadeUp {
-  0% { transform: translateY(10px); opacity: 0; }
+  0% { transform: translateY(20px); opacity: 0; }
   100% { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-15px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes pulseStar {
@@ -103,32 +107,30 @@ footer {
   50% { transform: scale(1.1); }
 }
 
-/* Мобільна адаптація */
-@media (max-width: 768px) {
-  .header-logo { width: 240px; }
-  .logo-estevents { width: 70px; }
-  .cell { font-size: 1.3em; }
-  .scoreboard { padding: 15px 30px; width: 85%; }
-  .decor { font-size: 1.5em; }
+/* Адаптація для звичайних моніторів, якщо перевірятимете не на гігантському екрані */
+@media (max-width: 1920px) {
+  .header-logo { width: 450px; }
+  .cell { font-size: 3em; }
+  .cell:first-child { font-size: 3.5em; }
 }
 </style>
 </head>
 <body>
 
 <header>
-  <img src="logo_sportart.png.jpg" alt="Sport Art Cup" class="header-logo">
+  <img src="logo_sportart.png.jpg" alt="Sport Art LIVE" class="header-logo">
 </header>
 
 <img src="logo_estevents.png.png" alt="EstEvents Logo" class="logo-estevents">
 
 <div class="scoreboard" id="scoreboard">
-  <div class="decor">👑</div>
+  <div class="decor">⭐</div>
   <div id="content" class="cell-container">
-    <div class="cell">Завантаження...</div>
+    <div class="cell">ЗАВАНТАЖЕННЯ...</div>
   </div>
 </div>
 
-<footer>© 2025 EstEvents by Емма Щелецька</footer>
+<footer>© 2026 EstEvents by Емма Щелецька</footer>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycby8bIfxUFNLKBZZ9OQn9r-Dqt7jsaJULJJ-yNHhIT8U7AFGkWf8aiNrbG7cVbxEw6Oc0w/exec";
@@ -139,4 +141,35 @@ async function loadData() {
   const content = document.getElementById("content");
 
   try {
-    const res = await fetch(API_URL
+    const res = await fetch(API_URL + "?t=" + Date.now());
+    if (!res.ok) return;
+
+    const data = await res.json();
+    if (!Array.isArray(data)) return;
+
+    const fixedRow = Array.from({ length: 7 }, (_, i) => {
+      return data[i] !== undefined && String(data[i]).trim() !== "" ? String(data[i]).trim() : "—";
+    });
+
+    const newData = JSON.stringify(fixedRow);
+    if (newData === lastData) return;
+    lastData = newData;
+
+    scoreboard.style.filter = "blur(10px)";
+
+    setTimeout(() => {
+      content.innerHTML = fixedRow.map((v, i) => 
+        `<div class="cell" style="animation-delay: ${i * 0.05}s">${v}</div>`
+      ).join('');
+      scoreboard.style.filter = "blur(0)";
+    }, 300);
+
+  } catch (e) { console.error("Data Error", e); }
+}
+
+loadData();
+setInterval(loadData, 2500);
+</script>
+
+</body>
+</html>
