@@ -7,65 +7,67 @@
 <style>
 body {
   margin: 0;
+  padding: 0;
   font-family: "Poppins", sans-serif;
   background: radial-gradient(circle at top, #1a082b 0%, #0c0215 100%);
   color: #e3cfff;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: center; /* Центрує вміст по вертикалі */
   align-items: center;
   height: 100vh;
   text-align: center;
   overflow: hidden;
 }
 
-/* ЦЕНТРАЛЬНИЙ ЛОГОТИП ВЕРХУ */
 header {
-  margin-bottom: 20px;
+  flex-shrink: 0; /* Не дає логотипу стискатися */
+  margin-bottom: 10px; /* Зменшений відступ */
   animation: fadeIn 1.5s ease-in-out;
 }
 
 .header-logo {
-  width: 450px; /* Збільшений розмір для центру */
+  width: 380px; /* Оптимальний розмір, щоб не тиснути на таблицю */
   height: auto;
   filter: drop-shadow(0 0 15px rgba(194, 153, 255, 0.4));
 }
 
-/* ЛОГОТИП ESTEVENTS (ВНИЗУ) */
 .logo-estevents {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 110px;
+  width: 100px;
   height: auto;
   z-index: 1000;
-  opacity: 0.9;
+  opacity: 0.8;
 }
 
 .scoreboard {
   background: rgba(255, 255, 255, 0.05);
   border: 2px solid rgba(200, 150, 255, 0.4);
   border-radius: 20px;
-  padding: 30px 60px;
+  padding: 25px 50px; /* Трохи компактніші відступи */
   box-shadow: 0 0 40px rgba(160, 80, 255, 0.2);
   backdrop-filter: blur(15px);
-  min-width: 60%;
+  min-width: 55%;
+  max-height: 70vh; /* Щоб не виходила за межі екрана */
+  overflow-y: auto; /* На випадок задовгого списку */
   transition: filter 0.5s ease-in-out, transform 0.5s ease-in-out;
 }
 
 .updating {
   filter: blur(8px);
-  transform: scale(0.98);
+  transform: scale(0.99);
 }
 
 .cell-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px; /* Менша відстань між рядками */
 }
 
 .cell {
-  font-size: 2em;
+  font-size: 1.8em;
   color: #bb8fff;
   font-weight: 600;
   text-shadow: 0 0 10px rgba(187, 143, 255, 0.3);
@@ -73,17 +75,17 @@ header {
 }
 
 .decor {
-  font-size: 2.5em;
+  font-size: 2em;
   color: #ffd700;
   margin-bottom: 10px;
   animation: pulseStar 2s infinite ease-in-out;
 }
 
 footer {
-  margin-top: 30px;
+  margin-top: 20px;
   color: #bdaaff;
-  font-size: 0.9em;
-  opacity: 0.7;
+  font-size: 0.85em;
+  opacity: 0.6;
 }
 
 @keyframes fadeUp {
@@ -92,27 +94,29 @@ footer {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
+  from { opacity: 0; transform: translateY(-15px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes pulseStar {
-  0%, 100% { transform: scale(1); text-shadow: 0 0 15px #ffd700; }
-  50% { transform: scale(1.15); text-shadow: 0 0 30px #ffea8a; }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
+/* Мобільна адаптація */
 @media (max-width: 768px) {
-  .header-logo { width: 280px; }
-  .logo-estevents { width: 80px; bottom: 10px; right: 10px; }
-  .cell { font-size: 1.4em; }
-  .scoreboard { padding: 20px; width: 85%; }
+  .header-logo { width: 240px; }
+  .logo-estevents { width: 70px; }
+  .cell { font-size: 1.3em; }
+  .scoreboard { padding: 15px 30px; width: 85%; }
+  .decor { font-size: 1.5em; }
 }
 </style>
 </head>
 <body>
 
 <header>
-  <img src="logo_sportart.png.jpg" alt="Sport Art Cup 2026" class="header-logo">
+  <img src="logo_sportart.png.jpg" alt="Sport Art Cup" class="header-logo">
 </header>
 
 <img src="logo_estevents.png.png" alt="EstEvents Logo" class="logo-estevents">
@@ -120,7 +124,7 @@ footer {
 <div class="scoreboard" id="scoreboard">
   <div class="decor">👑</div>
   <div id="content" class="cell-container">
-    <div class="cell">Очікування даних...</div>
+    <div class="cell">Завантаження...</div>
   </div>
 </div>
 
@@ -135,35 +139,4 @@ async function loadData() {
   const content = document.getElementById("content");
 
   try {
-    const res = await fetch(API_URL + "?t=" + Date.now());
-    if (!res.ok) return;
-
-    const data = await res.json();
-    if (!Array.isArray(data)) return;
-
-    const fixedRow = Array.from({ length: 7 }, (_, i) => {
-      return data[i] !== undefined && String(data[i]).trim() !== "" ? String(data[i]).trim() : "—";
-    });
-
-    const newData = JSON.stringify(fixedRow);
-    if (newData === lastData) return;
-    lastData = newData;
-
-    scoreboard.classList.add("updating");
-
-    setTimeout(() => {
-      content.innerHTML = fixedRow.map((v, i) => 
-        `<div class="cell" style="animation-delay: ${i * 0.05}s">${v}</div>`
-      ).join('');
-      scoreboard.classList.remove("updating");
-    }, 300);
-
-  } catch (e) { console.error("Помилка завантаження", e); }
-}
-
-loadData();
-setInterval(loadData, 2500);
-</script>
-
-</body>
-</html>
+    const res = await fetch(API_URL
