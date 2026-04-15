@@ -155,9 +155,17 @@ async function loadData() {
     const data = await res.json();
     if (!Array.isArray(data)) return;
 
-    const fixedRow = data.slice(1, 7).map(v => 
-      v !== undefined && String(v).trim() !== "" ? String(v).trim() : "—"
-    );
+    // ЗМІНЕНО ТІЛЬКИ ЦЕЙ БЛОК: ФОРМАТУВАННЯ ОЦІНКИ (ІНДЕКС 5 = СТОВПЕЦЬ G)
+    const fixedRow = data.slice(1, 7).map((v, index) => {
+      if (v === undefined || String(v).trim() === "") return "—";
+      
+      if (index === 5) {
+        let num = parseFloat(String(v).replace(',', '.'));
+        if (!isNaN(num)) return num.toFixed(3);
+      }
+      
+      return String(v).trim();
+    });
 
     const newData = JSON.stringify(fixedRow);
     if (newData === lastData) return;
