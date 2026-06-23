@@ -22,7 +22,7 @@ body {
 
 header {
   flex-shrink: 0;
-  margin-top: -70px; 
+  margin-top: 10px; 
   margin-bottom: 2px; 
   animation: fadeIn 1.5s ease-in-out;
 }
@@ -56,8 +56,7 @@ header {
   flex-direction: column;
   justify-content: center; 
   transition: filter 0.5s ease-in-out;
-  margin-top: -140px; 
-  /* Додано невеликий відступ знизу, щоб футер не зливався з рамкою */
+  margin-top: 20px; 
   margin-bottom: 10px; 
 }
 
@@ -90,7 +89,6 @@ header {
 }
 
 footer {
-  /* ФУТЕР ТЕПЕР ПІД РАМКОЮ */
   color: #bdaaff;
   font-size: 1.2em; 
   font-weight: 600;
@@ -117,7 +115,7 @@ footer {
   .header-logo { width: 220px; }
   .cell { font-size: 1.4em; }
   .cell:first-child { font-size: 1.7em; }
-  .scoreboard { padding: 15px 25px; min-width: 92%; margin-top: 0; }
+  .scoreboard { padding: 15px 25px; min-width: 92%; margin-top: 10px; }
   .header { margin-top: 5px; }
   .decor { font-size: 1.8em; }
 }
@@ -126,7 +124,7 @@ footer {
 <body>
 
 <header>
-  <img src="Lemberg Cup.png" alt="Sport Art Cup" class="header-logo">
+  <img src="Lemberg Cup.png" alt="Lemberg Cup" class="header-logo">
 </header>
 
 <img src="logo_estevents.png.png" alt="EstEvents Logo" class="logo-estevents">
@@ -155,7 +153,6 @@ async function loadData() {
     const data = await res.json();
     if (!Array.isArray(data)) return;
 
-    // ЗМІНЕНО ТІЛЬКИ ЦЕЙ БЛОК: ФОРМАТУВАННЯ ОЦІНКИ (ІНДЕКС 5 = СТОВПЕЦЬ G)
     const fixedRow = data.slice(1, 7).map((v, index) => {
       if (v === undefined || String(v).trim() === "") return "—";
       
