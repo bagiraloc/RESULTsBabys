@@ -9,8 +9,9 @@ body {
   margin: 0;
   padding: 0;
   font-family: "Poppins", sans-serif;
-  background: radial-gradient(circle at top, #1a082b 0%, #0c0215 100%);
-  color: #ffffff;
+  /* Изумрудный градиент */
+  background: radial-gradient(circle at center, #0a3d24 0%, #061a0f 100%);
+  color: #eb8eb7;
   display: flex;
   flex-direction: column;
   justify-content: flex-start; 
@@ -30,7 +31,7 @@ header {
 .header-logo {
   width: 400px; 
   height: auto;
-  filter: drop-shadow(0 0 20px rgba(194, 153, 255, 0.4));
+  filter: drop-shadow(0 0 10px #eb8eb7);
 }
 
 .logo-estevents {
@@ -44,12 +45,12 @@ header {
 }
 
 .scoreboard {
-  background: rgba(255, 255, 255, 0.05);
-  border: 4px solid rgba(200, 150, 255, 0.5); 
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid #eb8eb7; 
   border-radius: 30px;
   padding: 20px 40px; 
-  box-shadow: 0 0 50px rgba(160, 80, 255, 0.2);
-  backdrop-filter: blur(15px);
+  box-shadow: 0 0 30px rgba(235, 142, 183, 0.2);
+  backdrop-filter: blur(10px);
   min-width: 80%; 
   max-height: 55vh; 
   display: flex;
@@ -68,31 +69,34 @@ header {
 
 .cell {
   font-size: 3.5em; 
-  color: #ffffff;
+  color: #eb8eb7; /* Розовый цвет */
   font-weight: 900; 
+  text-transform: uppercase;
   line-height: 1.1;
-  text-shadow: 3px 3px 15px rgba(0, 0, 0, 0.5);
+  /* Неоновая тень */
+  text-shadow: 0 0 10px #eb8eb7, 0 0 20px #ff007f;
   animation: fadeUp 0.6s ease-out forwards;
 }
 
 .cell:first-child {
-  color: #ffffff;
+  color: #eb8eb7;
   font-size: 4em;
   margin-bottom: 5px;
 }
 
 .decor {
   font-size: 3em;
-  color: #ffffff;
+  color: #eb8eb7;
   margin-bottom: 5px;
+  text-shadow: 0 0 10px #eb8eb7;
   animation: pulseStar 2s infinite ease-in-out;
 }
 
 footer {
-  color: #bdaaff;
+  color: #eb8eb7;
   font-size: 1em; 
   font-weight: 600;
-  opacity: 0.7;
+  opacity: 0.8;
   flex-shrink: 0;
   margin-bottom: 5px;
 }
